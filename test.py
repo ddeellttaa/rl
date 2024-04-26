@@ -93,7 +93,7 @@ class DQNAgent(object):
             epochs.append(i)
       
             if (i+1) % 200 == 0:
-                torch.save(model, f'/data2/model{i}.pth')
+                torch.save(model, f'model{i}.pth')
             # if R>200:
             #     torch.save(model, f'good_model{i}.pth')
             self.env.close()
@@ -103,13 +103,13 @@ class DQNAgent(object):
                 plt.plot(epochs,losses,label="loss")
                 plt.xlabel("epoch")
                 plt.legend()
-                plt.savefig(f"/data2/model{i}loss.png", dpi = 400)
+                plt.savefig(f"model{i}loss.png", dpi = 400)
                 plt.close() 
                 plt.figure(figsize=(12,6))
                 plt.plot(epochs,rewards,label="reward")
                 plt.xlabel("epoch")
-                plt.legend()
-                plt.savefig(f"/data2/model{i}reward.png", dpi = 400)
+                plt.legend()m
+                plt.savefig(f"model{i}reward.png", dpi = 400)
                 plt.close()
         return l     
     
