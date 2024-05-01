@@ -40,18 +40,21 @@ class DQNAgent(object):
         in_dim = self.env.observation_space.shape[0]
         out_dim = self.env.action_space.n
         gamma = 0.99
-        epsilon = 0.25
+        epsilon = 1
+        eps_end = 0.1
+        eps_decay = 0.995 
         
         losses = []
         rewards = [] 
         avg_rewards = []       
-
+        times = []
         model = DQN(in_dim, out_dim).to(self.device)
        # model =  torch.load("data/model1999.pth", map_location = self.device)
         model.train()
         loss = nn.MSELoss()
         optimizer = torch.optim.Adam(model.parameters(), lr=0.0005)
-        scheduler = StepLR(optimizer, step_size=50, gamma=0.7)    
+        # scheduler = StepLR(optimizer, step_size=50, gamma=0.7)    
+
         state =  self.env.reset()
         state = torch.from_numpy(state).float().to(self.device)
 
@@ -94,19 +97,22 @@ class DQNAgent(object):
                 #self.env.render()
             
                 # if (i+1) % 100 == 0:
-                #     self.env.render()
+               
+                 #     self.env.render()
+            # scheduler.step()
+            epsilon = max(eps_end, epsilon*eps_decay)
             losses.append(J/C)
             rewards.append(R)
+            times.append(C)
             avg_rewards.append(np.mean(rewards[-100:]))
             epochs.append(i)
-            print(f"epoch:{i}  rewards:{R} avg_reward:{np.mean(rewards[-100:])} time:{C}")
+            print(f"epoch:{i}  rewards:{R} avg_reward:{np.mean(rewards[-100:])} time:{C}, lr:{optimizer.param_groups[0]['lr']}")
       
             if (i+1) % 200 == 0:
                 torch.save(model, f'model{i}.pth')
             # if R>200:
             #     torch.save(model, f'good_model{i}.pth')
             self.env.close()
-            scheduler.step()
             if (i + 1) % 100 ==0:
                 plt.figure(figsize=(24,6))
                 plt.plot(epochs,losses,label="loss")
@@ -120,6 +126,11 @@ class DQNAgent(object):
                 plt.xlabel("epoch")
                 plt.legend()
                 plt.savefig(f"model{i}reward.png", dpi = 400)
+                plt.close()
+                plt.figure(figsize=(24,6))                plt.plot(epochs,times,label="times")
+                plt.xlabel("epoch")
+                plt.legend()
+                plt.savefig(f"model{i}times.png", dpi = 400)
                 plt.close()
         return l     
     
